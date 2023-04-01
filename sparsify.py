@@ -13,6 +13,7 @@ from hydra import compose, initialize
 from omegaconf import DictConfig
 # from neptune.new.integrations.pytorch_lightning import NeptuneLogger
 # from pytorch_lightning.callbacks import QuantizationAwareTraining
+from pl_bolts.callbacks import SparseMLCallback
 from pytorch_lightning.callbacks import ModelPruning
 from pytorch_lightning.loggers import CometLogger
 from torch import nn, optim
@@ -54,3 +55,24 @@ def main(cfg: DictConfig) -> None:
                               is_capsnet=is_capsnet)
     input_sample = torch.randn(1, 1, 16, 16, 16)
     model.to_onnx("sparsify.onnx", input_sample=input_sample)
+
+    SparseMLCallback.export_to_sparse_onnx(model,
+                                           "onnx_models/",
+                                           input_sample,
+                                           convert_qat=True,
+                                           input_names=["input"],
+                                           output_names=["output"],
+                                           dynamic_axes={
+                                               'input': {
+                                                   0: 'batch',
+                                                   2: "x",
+                                                   3: "y",
+                                                   4: "z"
+                                               },
+                                               'output': {
+                                                   0: 'batch',
+                                                   2: "x",
+                                                   3: "y",
+                                                   4: "z"
+                                               }
+                                           })

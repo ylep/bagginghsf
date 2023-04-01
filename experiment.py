@@ -109,8 +109,10 @@ def main(cfg: DictConfig) -> None:
         trainer = pl.Trainer(logger=logger,
                              callbacks=[
                                  ModelPruning(
-                                     "l1_unstructured",
+                                     "ln_structured",
                                      amount=compute_amount,
+                                     pruning_dim=1,
+                                     pruning_norm=1,
                                      make_pruning_permanent=True,
                                      use_lottery_ticket_hypothesis=True)
                              ],
